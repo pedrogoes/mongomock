@@ -1606,6 +1606,22 @@ def _handle_match_stage(in_collection, database, options):
     ]
 
 
+def _handle_unset_stage(in_collection, database, options):
+    if isinstance(options, str):
+        options = [options]
+    elif not isinstance(options, list):
+        raise OperationFailure('The $unset stage must be a string or an array of field names')
+
+    out_collection = []
+    for doc in in_collection:
+        new_doc = copy.deepcopy(doc)
+        for field in options:
+            if field in new_doc:
+                del new_doc[field]
+        out_collection.append(new_doc)
+    return out_collection
+
+
 _PIPELINE_HANDLERS = {
     '$addFields': _handle_add_fields_stage,
     '$bucket': _handle_bucket_stage,
@@ -1635,7 +1651,7 @@ _PIPELINE_HANDLERS = {
     '$skip': lambda c, d, o: c[o:],
     '$sort': _handle_sort_stage,
     '$sortByCount': None,
-    '$unset': None,
+    '$unset': _handle_unset_stage,
     '$unwind': _handle_unwind_stage,
 }
 
