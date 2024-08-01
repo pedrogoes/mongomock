@@ -1682,8 +1682,11 @@ def process_pipeline(collection, database, pipeline, session):
     if session:
         raise NotImplementedError('Mongomock does not handle sessions yet')
 
+    print("Starting process_pipeline with pipeline")
     for stage in pipeline:
+        print("Processing stage")
         for operator, options in stage.items():
+            print("Processing operator:", operator, "with options:", options)
             try:
                 handler = _PIPELINE_HANDLERS[operator]
             except KeyError as err:
