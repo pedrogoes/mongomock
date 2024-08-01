@@ -1607,18 +1607,27 @@ def _handle_match_stage(in_collection, database, options):
 
 
 def _handle_unset_stage(in_collection, database, options):
+    print("Starting _handle_unset_stage with options:", options)
+
     if isinstance(options, str):
         options = [options]
     elif not isinstance(options, list):
         raise OperationFailure('The $unset stage must be a string or an array of field names')
 
+    print("Processed options:", options)
+
     out_collection = []
     for doc in in_collection:
+        print("Processing document:", doc)
         new_doc = copy.deepcopy(doc)
         for field in options:
             if field in new_doc:
+                print("Removing field:", field)
                 del new_doc[field]
         out_collection.append(new_doc)
+        print("Processed document:", new_doc)
+
+    print("Completed _handle_unset_stage with result:", out_collection)
     return out_collection
 
 
