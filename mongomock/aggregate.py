@@ -1687,6 +1687,9 @@ def process_pipeline(collection, database, pipeline, session):
         print("Processing stage")
         for operator, options in stage.items():
             print("Processing operator:", operator, "with options:", options)
+            if operator in ['$unset', '$set']:
+                pass
+
             try:
                 handler = _PIPELINE_HANDLERS[operator]
             except KeyError as err:
@@ -1698,6 +1701,16 @@ def process_pipeline(collection, database, pipeline, session):
                 raise NotImplementedError(
                     "Although '%s' is a valid operator for the aggregation pipeline, it is "
                     'currently not implemented in Mongomock.' % operator)
+            collection = handler(collection, database, options)
+
+        if '$unset' in stage:
+            options = stage['$unset']
+            handler = _PIPELINE_HANDLERS['$unset']
+            collection = handler(collection, database, options)
+
+        if '$set' in stage:
+            options = stage['$set']
+            handler = _PIPELINE_HANDLERS['$set']
             collection = handler(collection, database, options)
 
     return command_cursor.CommandCursor(collection)
