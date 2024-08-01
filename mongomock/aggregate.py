@@ -1553,13 +1553,23 @@ def _handle_add_fields_stage(in_collection, unused_database, options):
     if not options:
         raise OperationFailure(
             'Invalid $addFields :: caused by :: specification must have at least one field')
+
+    print("Initial in_collection:", in_collection)
+    print("Options:", options)
+
     out_collection = [dict(doc) for doc in in_collection]
+    print("Initial out_collection:", out_collection)
+
     for field, value in options.items():
+        print(f"Processing field: {field}, value: {value}")
         for in_doc, out_doc in zip(in_collection, out_collection):
             try:
                 out_value = _parse_expression(value, in_doc, ignore_missing_keys=True)
+                print(f"Parsed value for field {field}: {out_value}")
             except KeyError:
+                print(f"KeyError for field {field} in document {in_doc}")
                 continue
+
             parts = field.split('.')
             for subfield in parts[:-1]:
                 out_doc[subfield] = out_doc.get(subfield, {})
@@ -1567,6 +1577,9 @@ def _handle_add_fields_stage(in_collection, unused_database, options):
                     out_doc[subfield] = {}
                 out_doc = out_doc[subfield]
             out_doc[parts[-1]] = out_value
+            print(f"Updated document: {out_doc}")
+
+    print("Final out_collection:", out_collection)
     return out_collection
 
 
@@ -1606,7 +1619,7 @@ def _handle_match_stage(in_collection, database, options):
     ]
 
 
-def _handle_unset_stage(in_collection, database, options):
+def _handle_unset_stage(in_collection, unused_database, options):
     print("Starting _handle_unset_stage with options:", options)
 
     if isinstance(options, str):
@@ -1614,11 +1627,8 @@ def _handle_unset_stage(in_collection, database, options):
     elif not isinstance(options, list):
         raise OperationFailure('The $unset stage must be a string or an array of field names')
 
-    print("Processed options:", options)
-
     out_collection = []
     for doc in in_collection:
-        print("Processing document:", doc)
         new_doc = copy.deepcopy(doc)
         for field in options:
             if field.startswith('_link_'):
@@ -1629,7 +1639,6 @@ def _handle_unset_stage(in_collection, database, options):
                 del new_doc[field]
 
         out_collection.append(new_doc)
-        print("Processed document:", new_doc)
 
     print("Completed _handle_unset_stage with result:", out_collection)
     return out_collection
