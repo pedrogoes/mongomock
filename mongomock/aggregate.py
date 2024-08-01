@@ -1621,9 +1621,13 @@ def _handle_unset_stage(in_collection, database, options):
         print("Processing document:", doc)
         new_doc = copy.deepcopy(doc)
         for field in options:
+            if field.startswith('_link_'):
+                field = field[len('_link_'):]
+
             if field in new_doc:
                 print("Removing field:", field)
                 del new_doc[field]
+
         out_collection.append(new_doc)
         print("Processed document:", new_doc)
 
